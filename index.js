@@ -23,4 +23,35 @@ const abi = JSON.parse(interface);
 // Initialize a new contract object:
 const contract = new web3.eth.Contract(abi);
 
-console.log(contract);
+// console.log(contract)
+
+const deployAndRunContract = async () => {
+    // Get the addresses of testrpc's fake wallet:
+    const addresses = await web3.eth.getAccounts();
+    
+    // Get the current price of gas
+    const gasPrice = await web3.eth.getGasPrice();
+  
+    try {
+      // Deploy the HelloWorld contract (its bytecode) 
+      // by spending some gas from our first address
+      const contractInstance = await contract.deploy({
+        data: bytecode
+      }).send({
+        from: addresses[0],
+        gas: 1000000,
+        gasPrice,
+      });
+  
+      console.log("Deployed at", contractInstance.options.address);
+  
+      // Call the "getMyName" function and log the result:
+      const myName = await contractInstance.methods.getMyName().call();
+      console.log("Result from blockchain:", myName);
+      
+    } catch (err) {
+      console.log("Failed to deploy", err);
+    }
+  }
+  
+  deployAndRunContract(); // Call the function
